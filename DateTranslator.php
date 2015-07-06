@@ -142,7 +142,7 @@ class DateTranslator extends Component
         } else {
             $dt = clone $dt;
         }
-        return $dt->setTimeZone($this->translators[$locale]['displayTimeZone']);
+        return $dt->setTimeZone(new DateTimeZone($this->translators[$locale]['displayTimeZone']));
     }
     
     /**
@@ -159,7 +159,7 @@ class DateTranslator extends Component
         } else {
             $dt = clone $dt;
         }
-        return $dt->setTimeZone($this->saveTimeZone);
+        return $dt->setTimeZone(new DateTimeZone($this->saveTimeZone));
     }
     
     /**
