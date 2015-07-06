@@ -8,26 +8,36 @@ use DateTimeZone;
 use yii\base\InvalidConfigException;
 use yii\base\Component;
 
+/**
+ * 
+ * @author Vasilij Belosludcev http://mihaly4.ru
+ */
 class DateTranslator extends Component
 {
     /**
      * @var string
+     * @see http://php.net/manual/en/timezones.php
      */
     public $saveTimeZone = 'UTC';
     /**
      * @var string
+     * @see http://php.net/manual/ru/function.date.php
      */
     public $saveDate = 'Y-m-d';
     /**
      * @var string
+     * @see http://php.net/manual/ru/function.date.php
      */
     public $saveTime = 'H:i:s';
     /**
      * @var string
+     * @see http://php.net/manual/ru/function.date.php
      */
     public $saveDateTime = 'U';
     /**
      * @var array
+     * @see http://php.net/manual/en/timezones.php
+     * @see http://php.net/manual/ru/function.date.php
      */
     public $translators = [
         'ru' => [
@@ -123,6 +133,7 @@ class DateTranslator extends Component
      * @param DateTime|string $dt
      * @param string|null $locale
      * @return DateTime
+     * @throws Exception
      */
     protected function toDisplay($dt, $locale)
     {
@@ -138,6 +149,7 @@ class DateTranslator extends Component
      * 
      * @param DateTime|string $dt
      * @return DateTime
+     * @throws Exception
      */
     protected function toSave($dt) 
     {
