@@ -2,13 +2,18 @@
 
 namespace bupy7\date\translator;
 
-/**
- * This is just an example.
- */
-class AutoloadExample extends \yii\base\Widget
+class LocalDate extends Component
 {
-    public function run()
-    {
-        return "Hello!";
-    }
+    public $saveTimeZone = 'UTC';
+    public $saveDate = 'php:Y-m-d';
+    public $saveTime = 'php:H:i:s';
+    public $saveDateTime = 'php:U';
+    
+    public $displayTimeZone;
+    
+    
+    public $displayDate;
+    
+    
+    public $displayTime;    
 }
