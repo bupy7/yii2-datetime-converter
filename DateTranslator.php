@@ -128,6 +128,8 @@ class DateTranslator extends Component
     {
         if (!($dt instanceof DateTime)) {
             $dt = new DateTime($dt, new DateTimeZone($this->saveTimeZone));
+        } else {
+            $dt = clone $dt;
         }
         return $dt->setTimeZone($this->translators[$locale]['displayTimeZone']);
     }
@@ -142,6 +144,8 @@ class DateTranslator extends Component
         $locale = $this->getLocale();
         if (!($dt instanceof DateTime)) {
             $dt = new DateTime($dt, new DateTimeZone($this->translators[$locale]['displayTimeZone']));
+        } else {
+            $dt = clone $dt;
         }
         return $dt->setTimeZone($this->saveTimeZone);
     }
