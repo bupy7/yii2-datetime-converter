@@ -3,7 +3,8 @@
 namespace bupy7\date\translator;
 
 use Yii;
-use Carbon\Carbon;
+use DateTime;
+use DateTimeZone;
 use yii\base\InvalidConfigException;
 use yii\base\Component;
 
@@ -39,7 +40,7 @@ class DateTranslator extends Component
     
     /**
      * 
-     * @param Carbon|string $dt
+     * @param DateTime|string $dt
      * @return string
      */
     public function toSaveDate($dt)
@@ -49,7 +50,7 @@ class DateTranslator extends Component
     
     /**
      * 
-     * @param Carbon|string $dt
+     * @param DateTime|string $dt
      * @param string|null $locale
      * @return string
      */
@@ -61,7 +62,7 @@ class DateTranslator extends Component
     
     /**
      * 
-     * @param Carbon|string $dt
+     * @param DateTime|string $dt
      * @return string
      */
     public function toSaveTime($dt)
@@ -71,7 +72,7 @@ class DateTranslator extends Component
     
     /**
      * 
-     * @param Carbon|string $dt
+     * @param DateTime|string $dt
      * @param string|null $locale
      * @return string
      */
@@ -83,7 +84,7 @@ class DateTranslator extends Component
     
     /**
      * 
-     * @param Carbon|string $dt
+     * @param DateTime|string $dt
      * @return string
      */
     public function toSaveDateTime($dt)
@@ -93,7 +94,7 @@ class DateTranslator extends Component
     
     /**
      * 
-     * @param Carbon|string $dt
+     * @param DateTime|string $dt
      * @param string|null $locale
      * @return string
      */
@@ -105,31 +106,44 @@ class DateTranslator extends Component
     
     /**
      * 
-     * @param Carbon|string $dt
-     * @param string|null $locale
-     * @return Carbon
+     * @param string $name
+     * @return mixed
      */
-    protected function toDisplay($dt, $locale)
+    public function __get($name)
     {
-        if (!($dt instanceof Carbon)) {
-            $dt = new Carbon($dt, $this->saveTimeZone);
+        $locale = $this->getLocale();
+        if (isset($this->translators[$locale][$name])) {
+            return $this->translators[$locale][$name];
         }
-        $dt->setLocale($locale);
-        return $dt->tz($this->translators[$locale]['displayTimeZone']);
+        return parent::__get($name);
     }
     
     /**
      * 
-     * @param Carbon|string $dt
-     * @return Carbon
+     * @param DateTime|string $dt
+     * @param string|null $locale
+     * @return DateTime
+     */
+    protected function toDisplay($dt, $locale)
+    {
+        if (!($dt instanceof DateTime)) {
+            $dt = new DateTime($dt, new DateTimeZone($this->saveTimeZone));
+        }
+        return $dt->setTimeZone($this->translators[$locale]['displayTimeZone']);
+    }
+    
+    /**
+     * 
+     * @param DateTime|string $dt
+     * @return DateTime
      */
     protected function toSave($dt) 
     {
         $locale = $this->getLocale();
-        if (!($dt instanceof Carbon)) {
-            $dt = new Carbon($dt, $locale);
+        if (!($dt instanceof DateTime)) {
+            $dt = new DateTime($dt, new DateTimeZone($this->translators[$locale]['displayTimeZone']));
         }
-        return $dt->tz($this->saveTimeZone);
+        return $dt->setTimeZone($this->saveTimeZone);
     }
     
     /**
