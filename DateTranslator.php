@@ -24,7 +24,7 @@ class DateTranslator extends Component
     /**
      * @var string
      */
-    public $saveDateTime = 'php:U';
+    public $saveDateTime = 'U';
     /**
      * @var array
      */
