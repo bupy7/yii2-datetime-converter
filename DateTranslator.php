@@ -55,6 +55,7 @@ class DateTranslator extends Component
      */
     public function toDisplayDate($dt, $locale = null)
     {
+        $locale = $this->getLocale($locale);
         return $this->toDisplay($dt, $locale)->format($this->translators[$locale]['displayDate']);        
     }
     
@@ -76,6 +77,7 @@ class DateTranslator extends Component
      */
     public function toDisplayTime($dt, $locale = null)
     {
+        $locale = $this->getLocale($locale);
         return $this->toDisplay($dt, $locale)->format($this->translators[$locale]['displayTime']);  
     }
     
@@ -97,6 +99,7 @@ class DateTranslator extends Component
      */
     public function toDisplayDateTime($dt, $locale = null)
     {
+        $locale = $this->getLocale($locale);
         return $this->toDisplay($dt, $locale)->format($this->translators[$locale]['displayDateTime']); 
     }
     
@@ -108,7 +111,6 @@ class DateTranslator extends Component
      */
     protected function toDisplay($dt, $locale)
     {
-        $locale = $this->getLocale($locale);
         if (!($dt instanceof Carbon)) {
             $dt = new Carbon($dt, $this->saveTimeZone);
         }
