@@ -40,11 +40,11 @@ class DateTranslator extends Component
      * @see http://php.net/manual/ru/function.date.php
      */
     public $translators = [
-        'ru' => [
-            'displayTimeZone' => 'Europe/Minsk',
-            'displayDate' => 'd.m.Y',
+        'en' => [
+            'displayTimeZone' => 'UTC',
+            'displayDate' => 'Y-m-d',
             'displayTime' => 'H:i:s',
-            'displayDateTime' => 'd.m.Y, H:i:s'
+            'displayDateTime' => 'Y-m-d, H:i:s'
         ],
     ];
     
