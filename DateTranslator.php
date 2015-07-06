@@ -5,6 +5,7 @@ namespace bupy7\date\translator;
 use Yii;
 use Carbon\Carbon;
 use yii\base\InvalidConfigException;
+use yii\base\Component;
 
 class DateTranslator extends Component
 {
@@ -135,7 +136,7 @@ class DateTranslator extends Component
      * @return string
      * @throws InvalidConfigException
      */
-    protected function getLocale($locale)
+    protected function getLocale($locale = null)
     {
         if ($locale == null) {
             $locale = Yii::$app->language;
