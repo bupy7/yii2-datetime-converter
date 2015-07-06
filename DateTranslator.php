@@ -61,13 +61,12 @@ class DateTranslator extends Component
     /**
      * 
      * @param DateTime|string $dt
-     * @param string|null $locale
      * @return string
      */
-    public function toDisplayDate($dt, $locale = null)
+    public function toDisplayDate($dt)
     {
-        $locale = $this->getLocale($locale);
-        return $this->toDisplay($dt, $locale)->format($this->translators[$locale]['displayDate']);        
+        $locale = $this->getLocale();
+        return $this->toDisplay($dt)->format($this->translators[$locale]['displayDate']);        
     }
     
     /**
@@ -83,13 +82,12 @@ class DateTranslator extends Component
     /**
      * 
      * @param DateTime|string $dt
-     * @param string|null $locale
      * @return string
      */
-    public function toDisplayTime($dt, $locale = null)
+    public function toDisplayTime($dt)
     {
-        $locale = $this->getLocale($locale);
-        return $this->toDisplay($dt, $locale)->format($this->translators[$locale]['displayTime']);  
+        $locale = $this->getLocale();
+        return $this->toDisplay($dt)->format($this->translators[$locale]['displayTime']);  
     }
     
     /**
@@ -105,27 +103,12 @@ class DateTranslator extends Component
     /**
      * 
      * @param DateTime|string $dt
-     * @param string|null $locale
      * @return string
      */
-    public function toDisplayDateTime($dt, $locale = null)
-    {
-        $locale = $this->getLocale($locale);
-        return $this->toDisplay($dt, $locale)->format($this->translators[$locale]['displayDateTime']); 
-    }
-    
-    /**
-     * 
-     * @param string $name
-     * @return mixed
-     */
-    public function __get($name)
+    public function toDisplayDateTime($dt)
     {
         $locale = $this->getLocale();
-        if (isset($this->translators[$locale][$name])) {
-            return $this->translators[$locale][$name];
-        }
-        return parent::__get($name);
+        return $this->toDisplay($dt)->format($this->translators[$locale]['displayDateTime']); 
     }
     
     /**
@@ -135,8 +118,9 @@ class DateTranslator extends Component
      * @return DateTime
      * @throws Exception
      */
-    protected function toDisplay($dt, $locale)
+    public function toDisplay($dt)
     {
+        $locale = $this->getLocale();
         if (!($dt instanceof DateTime)) {
             $dt = new DateTime($dt, new DateTimeZone($this->saveTimeZone));
         } else {
@@ -151,7 +135,7 @@ class DateTranslator extends Component
      * @return DateTime
      * @throws Exception
      */
-    protected function toSave($dt) 
+    public function toSave($dt) 
     {
         $locale = $this->getLocale();
         if (!($dt instanceof DateTime)) {
@@ -160,6 +144,20 @@ class DateTranslator extends Component
             $dt = clone $dt;
         }
         return $dt->setTimeZone(new DateTimeZone($this->saveTimeZone));
+    }
+    
+    /**
+     * 
+     * @param string $name
+     * @return mixed
+     */
+    public function __get($name)
+    {
+        $locale = $this->getLocale();
+        if (isset($this->translators[$locale][$name])) {
+            return $this->translators[$locale][$name];
+        }
+        return parent::__get($name);
     }
     
     /**
