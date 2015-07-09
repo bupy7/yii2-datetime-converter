@@ -37,17 +37,18 @@ class TranslatorBehavior extends Behavior
     const TO_DISPLAY = 2;
     
     /**
-     * @var Translator|string|array
+     * @var Translator|string|array Translator of date/time. This may be name of component in application, 
+     * array configuration or instance of Translator class. By deault it name of component.
      */
-    public $translator = 'dateTranslator';
+    public $translator = 'dtTranslator';
     /**
      * @var integer Type of attribute for translation.
      */
-    public $type = self::TYPE_DATE_TIME;
+    public $type;
     /**
-     * @var integer Pointer translate to.
+     * @var integer Translate to save/display.
      */
-    public $to = self::TO_SAVE;
+    public $to;
     /**
      * @var array list of attributes that are to be automatically filled with the value specified via [[value]].
      * The array keys are the ActiveRecord events upon which the attributes are to be updated,
@@ -80,10 +81,10 @@ class TranslatorBehavior extends Behavior
         if (!($this->translator instanceof Translator)) {
             throw new InvalidConfigException('Invalid configuration of $translator property.');
         }
-        if (!in_array($this->type, [self::TYPE_DATE, self::TYPE_TIME, self::TYPE_DATE_TIME])) {
+        if (empty($this->type) || !in_array($this->type, [self::TYPE_DATE, self::TYPE_TIME, self::TYPE_DATE_TIME])) {
             throw new InvalidConfigException('Invalid configuration of $type property.');
         }
-        if (!in_array($this->to, [self::TO_SAVE, self::TO_DISPLAY])) {
+        if (empty($this->to) || !in_array($this->to, [self::TO_SAVE, self::TO_DISPLAY])) {
             throw new InvalidConfigException('Invalid configuration of $to property.');
         }
         $this->_method = 'to';

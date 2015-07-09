@@ -16,7 +16,7 @@ use yii\base\Component;
  * Add component to your config: 
  * 
  * ~~~
- * 'dateTimeTranslator' => [
+ * 'dtTranslator' => [
  *      'class' => 'bupy7\datetime\translator\Translator',
  *      // and config tranlsations if need for your locales (by default uses `en`)
  *      'ru' => [
@@ -28,7 +28,20 @@ use yii\base\Component;
  * ],
  * ~~~
  * 
+ * Examples:
+ * 
+ * ~~~
+ * $datetime = 2015-06-07 12:45:00;
+ * echo Yii::$app->dtTranslator->toDisplayDateTime($datetime);
+ * ~~~
+ * or 
+ * ~~~
+ * $datetime = new DateTime('now');
+ * echo Yii::$app->dtTranslator->toDisplayDateTime($datetime);
+ * ~~~
+ * 
  * @author Vasilij Belosludcev http://mihaly4.ru
+ * @since 1.0.0
  */
 class Translator extends Component
 {
