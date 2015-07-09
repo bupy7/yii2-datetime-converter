@@ -10,7 +10,8 @@ use yii\di\Instance;
 
 /**
  * 
- * @author Belosludcev Vasilij <bupy765@gmail.com>
+ * @author Belosludcev Vasilij <https://github.com/bupy7>
+ * @since 1.0.0
  */
 class ConverterBehavior extends Behavior
 {

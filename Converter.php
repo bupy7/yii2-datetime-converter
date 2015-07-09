@@ -42,7 +42,7 @@ use yii\base\Component;
  * echo Yii::$app->dtConverter->toDisplayDateTime($datetime);
  * ~~~
  * 
- * @author Vasilij Belosludcev http://mihaly4.ru
+ * @author Belosludcev Vasilij <https://github.com/bupy7>
  * @since 1.0.0
  */
 class Converter extends Component
@@ -196,8 +196,8 @@ class Converter extends Component
     public function __get($name)
     {
         $locale = $this->getFormat();
-        if (isset($this->format[$locale][$name])) {
-            return $this->format[$locale][$name];
+        if (isset($this->formats[$locale][$name])) {
+            return $this->formats[$locale][$name];
         }
         return parent::__get($name);
     }
