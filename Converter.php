@@ -7,7 +7,6 @@ use DateTime;
 use DateTimeZone;
 use yii\base\InvalidConfigException;
 use yii\base\Component;
-use yii\helpers\FormatConverter;
 
 /**
  * Component for converting date and time for saving or display of user.
@@ -19,8 +18,8 @@ use yii\helpers\FormatConverter;
  * ~~~
  * 'dtConverter' => [
  *      'class' => 'bupy7\datetime\converter\Converter',
- *      // add formats if need for your locales (by default uses `en`)
- *      'formats' => [
+ *      // add format patterns if need for your locales (by default uses `en`)
+ *      'patterns' => [
  *          'ru' => [
  *              'displayTimeZone' => 'Europe/Moscow',
  *              'displayDate' => 'php:d.m.Y',
@@ -72,21 +71,21 @@ class Converter extends Component
      */
     public $saveDateTime = 'php:U';
     /**
-     * @var array List of formats date and time for display and saving.
+     * @var array List of format patterns date and time for display and saving.
      * 
-     * Each element of array is language key with required formats for correcty converting operation:
+     * Each element of array is language key with required format patterns for correcty converting operation:
      *      - `displayTimeZone` - Time zone for display of user.
      *      - `displayDateTime` - Date and time format for display of user. (PHP or ICU format).
      *      - `displayDate` - Date format for display of user. (PHP or ICU format).
      *      - `displayTime` - Time format for display of user. (PHP or ICU format).
      * 
-     * You too can add any other formats at this array. 
+     * You too can add any other format patterns at this array. 
      * 
      * @see http://php.net/manual/en/timezones.php
      * @see http://php.net/manual/ru/function.date.php
      * @see http://userguide.icu-project.org/formatparse/datetime#TOC-Date-Time-Format-Syntax
      */
-    public $formats = [
+    public $patterns = [
         'en' => [
             'displayTimeZone' => 'UTC',
             'displayDate' => 'php:Y-m-d',
@@ -102,8 +101,8 @@ class Converter extends Component
      */
     public function toSaveDate($dt)
     {
-        $format = self::normalizeFormat($this->saveDate, 'date');
-        return $this->preSave($dt)->format($format);
+        $pattern = self::normalizePattern($this->saveDate);
+        return $this->preSave($dt)->format($pattern);
     }
     
     /**
@@ -113,8 +112,8 @@ class Converter extends Component
      */
     public function toDisplayDate($dt)
     {
-        $format = self::normalizeFormat($this->displayDate, 'date');
-        return $this->preDisplay($dt)->format($format);        
+        $pattern = self::normalizePattern($this->displayDate);
+        return $this->preDisplay($dt)->format($pattern);        
     }
     
     /**
@@ -124,10 +123,10 @@ class Converter extends Component
      */
     public function toSaveTime($dt)
     {
-        $format = self::normalizeFormat($this->saveTime, 'time');
+        $pattern = self::normalizePattern($this->saveTime);
         return $this->preSave($dt)
             ->setTimeZone(new DateTimeZone($this->saveTimeZone))
-            ->format($format);
+            ->format($pattern);
     }
     
     /**
@@ -137,10 +136,10 @@ class Converter extends Component
      */
     public function toDisplayTime($dt)
     {
-        $format = self::normalizeFormat($this->displayTime, 'time');
+        $pattern = self::normalizePattern($this->displayTime);
         return $this->preDisplay($dt)
             ->setTimeZone(new DateTimeZone($this->displayTimeZone))
-            ->format($format);  
+            ->format($pattern);  
     }
     
     /**
@@ -150,10 +149,10 @@ class Converter extends Component
      */
     public function toSaveDateTime($dt)
     {
-        $format = self::normalizeFormat($this->saveDateTime, 'datetime');
+        $pattern = self::normalizePattern($this->saveDateTime);
         return $this->preSave($dt)
             ->setTimeZone(new DateTimeZone($this->saveTimeZone))
-            ->format($format);
+            ->format($pattern);
     }
     
     /**
@@ -163,10 +162,10 @@ class Converter extends Component
      */
     public function toDisplayDateTime($dt)
     {
-        $format = self::normalizeFormat($this->displayDateTime, 'datetime');
+        $pattern = self::normalizePattern($this->displayDateTime);
         return $this->preDisplay($dt)
             ->setTimeZone(new DateTimeZone($this->displayTimeZone))
-            ->format($format); 
+            ->format($pattern); 
     }
     
     /**
@@ -202,15 +201,15 @@ class Converter extends Component
     }
     
     /**
-     * Get the value of format of current locale of application from formats settings.
+     * Get the value of format pattern of current locale of application.
      * @param string $name
      * @return mixed
      */
     public function __get($name)
     {
-        $format = $this->getFormat();
-        if (isset($format[$name])) {
-            return $format[$name];
+        $pattern = $this->getPattern();
+        if (isset($pattern[$name])) {
+            return $pattern[$name];
         }
         return parent::__get($name);
     }
@@ -228,28 +227,137 @@ class Converter extends Component
      * ICU format: http://userguide.icu-project.org/formatparse/datetime#TOC-Date-Time-Format-Syntax
      * 
      * @param string $pattern date format pattern in ICU format.
-     * @param string $type 'date', 'time', or 'datetime'.
      * @return string Normalize date format pattern.
      */
-    static public function normalizeFormat($pattern, $type = 'date')
+    static public function normalizePattern($pattern)
     {
         if (strpos($pattern, 'php:') === 0) {
             return substr($pattern, 4);         
         } 
-        return FormatConverter::convertDateIcuToPhp($pattern, $type);
+        // http://userguide.icu-project.org/formatparse/datetime#TOC-Date-Time-Format-Syntax
+        // escaped text
+        $escaped = [];
+        if (preg_match_all('/(?<!\')\'(.*?[^\'])\'(?!\')/', $pattern, $matches, PREG_SET_ORDER)) {
+            foreach ($matches as $match) {
+                $match[1] = str_replace('\'\'', '\'', $match[1]);
+                $escaped[$match[0]] = '\\'.implode('\\', preg_split('//u', $match[1], -1, PREG_SPLIT_NO_EMPTY));
+            }
+        }
+        return strtr($pattern, array_merge($escaped, [
+            '\'\'' => '\\\'', // two single quotes produce one
+            'G' => '', // era designator like (Anno Domini)
+            'Y' => 'o',     // 4digit year of "Week of Year"
+            'y' => 'Y',     // 4digit year e.g. 2014
+            'yyyy' => 'Y',  // 4digit year e.g. 2014
+            'yy' => 'y',    // 2digit year number eg. 14
+            'u' => '',      // extended year e.g. 4601
+            'U' => '',      // cyclic year name, as in Chinese lunar calendar
+            'r' => '',        // related Gregorian year e.g. 1996
+            'Q' => '',      // number of quarter
+            'QQ' => '',     // number of quarter '02'
+            'QQQ' => '',    // quarter 'Q2'
+            'QQQQ' => '',   // quarter '2nd quarter'
+            'QQQQQ' => '',  // number of quarter '2'
+            'q' => '',      // number of Stand Alone quarter
+            'qq' => '',     // number of Stand Alone quarter '02'
+            'qqq' => '',    // Stand Alone quarter 'Q2'
+            'qqqq' => '',   // Stand Alone quarter '2nd quarter'
+            'qqqqq' => '',  // number of Stand Alone quarter '2'
+            'M' => 'n',     // Numeric representation of a month, without leading zeros
+            'MM' => 'm',    // Numeric representation of a month, with leading zeros
+            'MMM' => 'M',   // A short textual representation of a month, three letters
+            'MMMM' => 'F',  // A full textual representation of a month, such as January or March
+            'MMMMM' => '',  //
+            'L' => 'n',     // Stand alone month in year
+            'LL' => 'm',    // Stand alone month in year
+            'LLL' => 'M',   // Stand alone month in year
+            'LLLL' => 'F',  // Stand alone month in year
+            'LLLLL' => '',  // Stand alone month in year
+            'w' => 'W',     // ISO-8601 week number of year
+            'ww' => 'W',    // ISO-8601 week number of year
+            'W' => '',      // week of the current month
+            'd' => 'j',     // day without leading zeros
+            'dd' => 'd',    // day with leading zeros
+            'D' => 'z',     // day of the year 0 to 365
+            'F' => '',      // Day of Week in Month. eg. 2nd Wednesday in July
+            'g' => '',      // Modified Julian day. This is different from the conventional Julian day number in two regards.
+            'E' => 'D',     // day of week written in short form eg. Sun
+            'EE' => 'D',
+            'EEE' => 'D',
+            'EEEE' => 'l',  // day of week fully written eg. Sunday
+            'EEEEE' => '',
+            'EEEEEE' => '',
+            'e' => 'N',     // ISO-8601 numeric representation of the day of the week 1=Mon to 7=Sun
+            'ee' => 'N',    // php 'w' 0=Sun to 6=Sat isn't supported by ICU -> 'w' means week number of year
+            'eee' => 'D',
+            'eeee' => 'l',
+            'eeeee' => '',
+            'eeeeee' => '',
+            'c' => 'N',     // ISO-8601 numeric representation of the day of the week 1=Mon to 7=Sun
+            'cc' => 'N',    // php 'w' 0=Sun to 6=Sat isn't supported by ICU -> 'w' means week number of year
+            'ccc' => 'D',
+            'cccc' => 'l',
+            'ccccc' => '',
+            'cccccc' => '',
+            'a' => 'a',     // am/pm marker
+            'h' => 'g',     // 12-hour format of an hour without leading zeros 1 to 12h
+            'hh' => 'h',    // 12-hour format of an hour with leading zeros, 01 to 12 h
+            'H' => 'G',     // 24-hour format of an hour without leading zeros 0 to 23h
+            'HH' => 'H',    // 24-hour format of an hour with leading zeros, 00 to 23 h
+            'k' => '',      // hour in day (1~24)
+            'kk' => '',     // hour in day (1~24)
+            'K' => '',      // hour in am/pm (0~11)
+            'KK' => '',     // hour in am/pm (0~11)
+            'm' => 'i',     // Minutes without leading zeros, not supported by php but we fallback
+            'mm' => 'i',    // Minutes with leading zeros
+            's' => 's',     // Seconds, without leading zeros, not supported by php but we fallback
+            'ss' => 's',    // Seconds, with leading zeros
+            'S' => '',      // fractional second
+            'SS' => '',     // fractional second
+            'SSS' => '',    // fractional second
+            'SSSS' => '',   // fractional second
+            'A' => '',      // milliseconds in day
+            'z' => 'T',     // Timezone abbreviation
+            'zz' => 'T',    // Timezone abbreviation
+            'zzz' => 'T',   // Timezone abbreviation
+            'zzzz' => 'T',  // Timzone full name, not supported by php but we fallback
+            'Z' => 'O',     // Difference to Greenwich time (GMT) in hours
+            'ZZ' => 'O',    // Difference to Greenwich time (GMT) in hours
+            'ZZZ' => 'O',   // Difference to Greenwich time (GMT) in hours
+            'ZZZZ' => '\G\M\TP', // Time Zone: long localized GMT (=OOOO) e.g. GMT-08:00
+            'ZZZZZ' => '',  //  TIme Zone: ISO8601 extended hms? (=XXXXX)
+            'O' => '',      // Time Zone: short localized GMT e.g. GMT-8
+            'OOOO' => '\G\M\TP', //  Time Zone: long localized GMT (=ZZZZ) e.g. GMT-08:00
+            'v' => '\G\M\TP', // Time Zone: generic non-location (falls back first to VVVV and then to OOOO) using the ICU defined fallback here
+            'vvvv' => '\G\M\TP', // Time Zone: generic non-location (falls back first to VVVV and then to OOOO) using the ICU defined fallback here
+            'V' => '',      // Time Zone: short time zone ID
+            'VV' => 'e',    // Time Zone: long time zone ID
+            'VVV' => '',    // Time Zone: time zone exemplar city
+            'VVVV' => '\G\M\TP', // Time Zone: generic location (falls back to OOOO) using the ICU defined fallback here
+            'X' => '',      // Time Zone: ISO8601 basic hm?, with Z for 0, e.g. -08, +0530, Z
+            'XX' => 'O, \Z', // Time Zone: ISO8601 basic hm, with Z, e.g. -0800, Z
+            'XXX' => 'P, \Z',    // Time Zone: ISO8601 extended hm, with Z, e.g. -08:00, Z
+            'XXXX' => '',   // Time Zone: ISO8601 basic hms?, with Z, e.g. -0800, -075258, Z
+            'XXXXX' => '',  // Time Zone: ISO8601 extended hms?, with Z, e.g. -08:00, -07:52:58, Z
+            'x' => '',      // Time Zone: ISO8601 basic hm?, without Z for 0, e.g. -08, +0530
+            'xx' => 'O',     // Time Zone: ISO8601 basic hm, without Z, e.g. -0800
+            'xxx' => 'P',    // Time Zone: ISO8601 extended hm, without Z, e.g. -08:00
+            'xxxx' => '',   // Time Zone: ISO8601 basic hms?, without Z, e.g. -0800, -075258
+            'xxxxx' => '',  // Time Zone: ISO8601 extended hms?, without Z, e.g. -08:00, -07:52:58
+        ]));
     }
     
     /**
-     * Return format settings of current locale.
+     * Return format pattern settings of current locale.
      * @return array
      * @throws InvalidConfigException
      */
-    protected function getFormat()
+    protected function getPattern()
     {
         $locale = Yii::$app->language;
-        if (!isset($this->formats[$locale])) {
-            throw new InvalidConfigException("Locale key '{$locale}' not found in `\$formats`.");
+        if (!isset($this->patterns[$locale])) {
+            throw new InvalidConfigException("Locale key '{$locale}' not found in `\$patterns`.");
         }
-        return $this->formats[$locale];
+        return $this->patterns[$locale];
     }
 }
