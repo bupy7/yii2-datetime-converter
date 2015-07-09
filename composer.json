@@ -1,5 +1,5 @@
 {
-    "name": "bupy7/yii2-date-translator",
+    "name": "bupy7/yii2-datetime-translator",
     "description": "II DEVELOPING!",
     "type": "yii2-extension",
     "keywords": ["yii2","extension","date","carbon","formatter","datetime","translator","time","datetime"],
@@ -15,7 +15,7 @@
     },
     "autoload": {
         "psr-4": {
-            "bupy7\\date\\translator\\": ""
+            "bupy7\\datetime\\translator\\": ""
         }
     }
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace bupy7\date\translator;
+namespace bupy7\datetime\translator;
 
 use Yii;
 use DateTime;
@@ -9,7 +9,24 @@ use yii\base\InvalidConfigException;
 use yii\base\Component;
 
 /**
- * Component for translate dates from one format/time zone to other.
+ * Component for translate date and time for saving or display of user.
+ * 
+ * Usage:
+ * 
+ * Add component to your config: 
+ * 
+ * ~~~
+ * 'dateTimeTranslator' => [
+ *      'class' => 'bupy7\datetime\translator\Translator',
+ *      // and config tranlsations if need for your locales (by default uses `en`)
+ *      'ru' => [
+            'displayTimeZone' => 'Europe/Moscow',
+            'displayDate' => 'd.m.Y',
+            'displayTime' => 'H:i:s',
+            'displayDateTime' => 'd.m.Y, H:i:s'
+        ],
+ * ],
+ * ~~~
  * 
  * @author Vasilij Belosludcev http://mihaly4.ru
  */
@@ -46,7 +63,7 @@ class Translator extends Component
      * @see http://php.net/manual/en/timezones.php
      * @see http://php.net/manual/ru/function.date.php
      */
-    public $translators = [
+    public $translations = [
         'en' => [
             'displayTimeZone' => 'UTC',
             'displayDate' => 'Y-m-d',
@@ -62,7 +79,7 @@ class Translator extends Component
      */
     public function toSaveDate($dt)
     {
-        return $this->toSave($dt)->format($this->saveDate);
+        return $this->preSave($dt)->format($this->saveDate);
     }
     
     /**
@@ -72,8 +89,7 @@ class Translator extends Component
      */
     public function toDisplayDate($dt)
     {
-        $locale = $this->getTranslation();
-        return $this->toDisplay($dt)->format($this->translators[$locale]['displayDate']);        
+        return $this->preDisplay($dt)->format($this->displayDate);        
     }
     
     /**
@@ -83,7 +99,9 @@ class Translator extends Component
      */
     public function toSaveTime($dt)
     {
-        return $this->toSave($dt)->format($this->saveTime);
+        return $this->preSave($dt)
+            ->setTimeZone(new DateTimeZone($this->saveTimeZone))
+            ->format($this->saveTime);
     }
     
     /**
@@ -93,8 +111,9 @@ class Translator extends Component
      */
     public function toDisplayTime($dt)
     {
-        $locale = $this->getTranslation();
-        return $this->toDisplay($dt)->format($this->translators[$locale]['displayTime']);  
+        return $this->preDisplay($dt)
+            ->setTimeZone(new DateTimeZone($this->displayTimeZone))
+            ->format($this->displayTime);  
     }
     
     /**
@@ -104,7 +123,9 @@ class Translator extends Component
      */
     public function toSaveDateTime($dt)
     {
-        return $this->toSave($dt)->format($this->saveDateTime);
+        return $this->preSave($dt)
+            ->setTimeZone(new DateTimeZone($this->saveTimeZone))
+            ->format($this->saveDateTime);
     }
     
     /**
@@ -114,42 +135,41 @@ class Translator extends Component
      */
     public function toDisplayDateTime($dt)
     {
-        $locale = $this->getTranslation();
-        return $this->toDisplay($dt)->format($this->translators[$locale]['displayDateTime']); 
+        return $this->preDisplay($dt)
+            ->setTimeZone(new DateTimeZone($this->displayTimeZone))
+            ->format($this->displayDateTime); 
     }
     
     /**
-     * Return instance of DateTime with settings for display of user.
+     * Return instance of DateTime with time zone of saving or copy $dt class.
      * @param DateTime|string $dt Instance of DateTime or string with date.
      * @return DateTime
      * @throws Exception
      */
-    public function toDisplay($dt)
+    public function preDisplay($dt)
     {
-        $locale = $this->getTranslation();
         if (!($dt instanceof DateTime)) {
             $dt = new DateTime($dt, new DateTimeZone($this->saveTimeZone));
         } else {
             $dt = clone $dt;
         }
-        return $dt->setTimeZone(new DateTimeZone($this->translators[$locale]['displayTimeZone']));
+        return $dt;
     }
     
     /**
-     * Return instance of DateTime with settings for save to database.
+     * Return instance of DateTime with time zone of display or copy $dt class.
      * @param DateTime|string $dt Instance of DateTime or string with date.
      * @return DateTime
      * @throws Exception
      */
-    public function toSave($dt) 
+    public function preSave($dt) 
     {
-        $locale = $this->getTranslation();
         if (!($dt instanceof DateTime)) {
-            $dt = new DateTime($dt, new DateTimeZone($this->translators[$locale]['displayTimeZone']));
+            $dt = new DateTime($dt, new DateTimeZone($this->displayTimeZone));
         } else {
             $dt = clone $dt;
         }
-        return $dt->setTimeZone(new DateTimeZone($this->saveTimeZone));
+        return $dt;
     }
     
     /**
@@ -160,25 +180,22 @@ class Translator extends Component
     public function __get($name)
     {
         $locale = $this->getTranslation();
-        if (isset($this->translators[$locale][$name])) {
-            return $this->translators[$locale][$name];
+        if (isset($this->translations[$locale][$name])) {
+            return $this->translations[$locale][$name];
         }
         return parent::__get($name);
     }
     
     /**
-     * Return translation settings of current/custom locale.
-     * @param string|null $locale
+     * Return translation settings of current locale.
      * @return array
      * @throws InvalidConfigException
      */
-    protected function getTranslation($locale = null)
+    protected function getTranslation()
     {
-        if ($locale == null) {
-            $locale = Yii::$app->language;
-        }
-        if (!isset($this->translators[$locale])) {
-            throw new InvalidConfigException("Locale key '{$locale}' not found in `\$translators`.");
+        $locale = Yii::$app->language;
+        if (!isset($this->translations[$locale])) {
+            throw new InvalidConfigException("Locale key '{$locale}' not found in `\$translations`.");
         }
         return $locale;
     }

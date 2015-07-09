@@ -112,14 +112,14 @@ class TranslatorBehavior extends Behavior
      */
     public function events()
     {
-        return array_fill_keys(array_keys($this->attributes), 'evaluateAttributes');
+        return array_fill_keys(array_keys($this->attributes), 'translateAttributes');
     }
     
     /**
-     * Evaluates the attribute date translator and assigns it to the current attributes.
+     * Translate value attribute and assigns it to the current attributes.
      * @param Event $event
      */
-    public function evaluateAttributes($event)
+    public function translateAttributes($event)
     {
         if (!empty($this->attributes[$event->name])) {
             $attributes = (array) $this->attributes[$event->name];
