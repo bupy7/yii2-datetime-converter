@@ -7,6 +7,7 @@ use DateTime;
 use DateTimeZone;
 use yii\base\InvalidConfigException;
 use yii\base\Component;
+use yii\helpers\FormatConverter;
 
 /**
  * Component for converting date and time for saving or display of user.
@@ -22,9 +23,9 @@ use yii\base\Component;
  *      'formats' => [
  *          'ru' => [
  *              'displayTimeZone' => 'Europe/Moscow',
- *              'displayDate' => 'd.m.Y',
- *              'displayTime' => 'H:i:s',
- *              'displayDateTime' => 'd.m.Y, H:i:s',
+ *              'displayDate' => 'php:d.m.Y',
+ *              'displayTime' => 'php:H:i:s',
+ *              'displayDateTime' => 'php:d.m.Y, H:i:s',
  *          ],
  *      ],
  * ],
@@ -53,38 +54,44 @@ class Converter extends Component
      */
     public $saveTimeZone = 'UTC';
     /**
-     * @var string Date format which uses for save in database.
+     * @var string Date format which uses for save in database. (PHP or ICU format).
      * @see http://php.net/manual/ru/function.date.php
+     * @see http://userguide.icu-project.org/formatparse/datetime#TOC-Date-Time-Format-Syntax
      */
-    public $saveDate = 'Y-m-d';
+    public $saveDate = 'php:Y-m-d';
     /**
-     * @var string Time format which uses for save in database.
+     * @var string Time format which uses for save in database. (PHP or ICU format).
      * @see http://php.net/manual/ru/function.date.php
+     * @see http://userguide.icu-project.org/formatparse/datetime#TOC-Date-Time-Format-Syntax
      */
-    public $saveTime = 'H:i:s';
+    public $saveTime = 'php:H:i:s';
     /**
-     * @var string Date and time format which uses for save in database.
+     * @var string Date and time format which uses for save in database. (PHP or ICU format).
      * @see http://php.net/manual/ru/function.date.php
+     * @see http://userguide.icu-project.org/formatparse/datetime#TOC-Date-Time-Format-Syntax
      */
-    public $saveDateTime = 'U';
+    public $saveDateTime = 'php:U';
     /**
      * @var array List of formats date and time for display and saving.
-     * Each element of array is language key with required properties for correcty converting operation.
-     * Require properties:
-     *      - `displayDateTime` - Date and time format for display of user.
-     *      - `displayDate` - Date format for display of user.
-     *      - `displayTime` - Time format for display of user.
+     * 
+     * Each element of array is language key with required formats for correcty converting operation:
      *      - `displayTimeZone` - Time zone for display of user.
-     * You too can add any other properties at this array. 
+     *      - `displayDateTime` - Date and time format for display of user. (PHP or ICU format).
+     *      - `displayDate` - Date format for display of user. (PHP or ICU format).
+     *      - `displayTime` - Time format for display of user. (PHP or ICU format).
+     * 
+     * You too can add any other formats at this array. 
+     * 
      * @see http://php.net/manual/en/timezones.php
      * @see http://php.net/manual/ru/function.date.php
+     * @see http://userguide.icu-project.org/formatparse/datetime#TOC-Date-Time-Format-Syntax
      */
     public $formats = [
         'en' => [
             'displayTimeZone' => 'UTC',
-            'displayDate' => 'Y-m-d',
-            'displayTime' => 'H:i:s',
-            'displayDateTime' => 'Y-m-d, H:i:s'
+            'displayDate' => 'php:Y-m-d',
+            'displayTime' => 'php:H:i:s',
+            'displayDateTime' => 'php:Y-m-d, H:i:s'
         ],
     ];
     
@@ -95,7 +102,8 @@ class Converter extends Component
      */
     public function toSaveDate($dt)
     {
-        return $this->preSave($dt)->format($this->saveDate);
+        $format = self::normalizeFormat($this->saveDate, 'date');
+        return $this->preSave($dt)->format($format);
     }
     
     /**
@@ -105,7 +113,8 @@ class Converter extends Component
      */
     public function toDisplayDate($dt)
     {
-        return $this->preDisplay($dt)->format($this->displayDate);        
+        $format = self::normalizeFormat($this->displayDate, 'date');
+        return $this->preDisplay($dt)->format($format);        
     }
     
     /**
@@ -115,9 +124,10 @@ class Converter extends Component
      */
     public function toSaveTime($dt)
     {
+        $format = self::normalizeFormat($this->saveTime, 'time');
         return $this->preSave($dt)
             ->setTimeZone(new DateTimeZone($this->saveTimeZone))
-            ->format($this->saveTime);
+            ->format($format);
     }
     
     /**
@@ -127,9 +137,10 @@ class Converter extends Component
      */
     public function toDisplayTime($dt)
     {
+        $format = self::normalizeFormat($this->displayTime, 'time');
         return $this->preDisplay($dt)
             ->setTimeZone(new DateTimeZone($this->displayTimeZone))
-            ->format($this->displayTime);  
+            ->format($format);  
     }
     
     /**
@@ -139,9 +150,10 @@ class Converter extends Component
      */
     public function toSaveDateTime($dt)
     {
+        $format = self::normalizeFormat($this->saveDateTime, 'datetime');
         return $this->preSave($dt)
             ->setTimeZone(new DateTimeZone($this->saveTimeZone))
-            ->format($this->saveDateTime);
+            ->format($format);
     }
     
     /**
@@ -151,9 +163,10 @@ class Converter extends Component
      */
     public function toDisplayDateTime($dt)
     {
+        $format = self::normalizeFormat($this->displayDateTime, 'datetime');
         return $this->preDisplay($dt)
             ->setTimeZone(new DateTimeZone($this->displayTimeZone))
-            ->format($this->displayDateTime); 
+            ->format($format); 
     }
     
     /**
@@ -195,11 +208,35 @@ class Converter extends Component
      */
     public function __get($name)
     {
-        $locale = $this->getFormat();
-        if (isset($this->formats[$locale][$name])) {
-            return $this->formats[$locale][$name];
+        $format = $this->getFormat();
+        if (isset($format[$name])) {
+            return $format[$name];
         }
         return parent::__get($name);
+    }
+    
+    /**
+     * Normalize a date format pattern from ICU format to php date() function format.
+     *
+     * The conversion is limited to date patterns that do not use escaped characters.
+     * Patterns like `d 'of' MMMM yyyy` which will result in a date like `1 of December 2014` may not be 
+     * converted correctly because of the use of escaped characters.
+     *
+     * Pattern constructs that are not supported by the PHP format will be removed.
+     *
+     * php date() function format: http://php.net/manual/en/function.date.php
+     * ICU format: http://userguide.icu-project.org/formatparse/datetime#TOC-Date-Time-Format-Syntax
+     * 
+     * @param string $pattern date format pattern in ICU format.
+     * @param string $type 'date', 'time', or 'datetime'.
+     * @return string Normalize date format pattern.
+     */
+    static public function normalizeFormat($pattern, $type = 'date')
+    {
+        if (strpos($pattern, 'php:') === 0) {
+            return substr($pattern, 4);         
+        } 
+        return FormatConverter::convertDateIcuToPhp($pattern, $type);
     }
     
     /**
@@ -213,6 +250,6 @@ class Converter extends Component
         if (!isset($this->formats[$locale])) {
             throw new InvalidConfigException("Locale key '{$locale}' not found in `\$formats`.");
         }
-        return $locale;
+        return $this->formats[$locale];
     }
 }
