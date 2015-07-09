@@ -1,8 +1,8 @@
 {
-    "name": "bupy7/yii2-datetime-translator",
+    "name": "bupy7/yii2-datetime-converter",
     "description": "II DEVELOPING!",
     "type": "yii2-extension",
-    "keywords": ["yii2","extension","date","carbon","formatter","datetime","translator","time","datetime"],
+    "keywords": ["yii2","extension","date","carbon","formatter","datetime","translator","time","datetime","converter"],
     "license": "BSD-3-Clause",
     "authors": [
         {
@@ -15,7 +15,7 @@
     },
     "autoload": {
         "psr-4": {
-            "bupy7\\datetime\\translator\\": ""
+            "bupy7\\datetime\\converter\\": ""
         }
     }
 }

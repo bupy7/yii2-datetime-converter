@@ -1,6 +1,6 @@
 <?php
 
-namespace bupy7\date\translator;
+namespace bupy7\datetime\converter;
 
 use Yii;
 use yii\base\Behavior;
@@ -12,7 +12,7 @@ use yii\di\Instance;
  * 
  * @author Belosludcev Vasilij <bupy765@gmail.com>
  */
-class TranslatorBehavior extends Behavior
+class ConverterBehavior extends Behavior
 {
     /**
      * Type of attribute: date.
@@ -37,16 +37,16 @@ class TranslatorBehavior extends Behavior
     const TO_DISPLAY = 2;
     
     /**
-     * @var Translator|string|array Translator of date/time. This may be name of component in application, 
-     * array configuration or instance of Translator class. By deault it name of component.
+     * @var Converter|string|array Converter of date/time. This may be name of component in application, 
+     * array configuration or instance of Converter class. By deault it name of component.
      */
-    public $translator = 'dtTranslator';
+    public $converter = 'dtConverter';
     /**
-     * @var integer Type of attribute for translation.
+     * @var integer Type of attribute for converter.
      */
     public $type;
     /**
-     * @var integer Translate to save/display.
+     * @var integer Converter to save/display.
      */
     public $to;
     /**
@@ -73,19 +73,19 @@ class TranslatorBehavior extends Behavior
     public function init()
     {
         parent::init();
-        if (is_string($this->translator)) {
-            $this->translator = Instance::ensure($this->translator, Translator::className());
-        } elseif (is_array($this->translator)) {
-            $this->translator = Yii::createObject($this->translator);
+        if (is_string($this->converter)) {
+            $this->converter = Instance::ensure($this->converter, Converter::className());
+        } elseif (is_array($this->converter)) {
+            $this->converter = Yii::createObject($this->converter);
         }
-        if (!($this->translator instanceof Translator)) {
-            throw new InvalidConfigException('Invalid configuration of $translator property.');
+        if (!($this->converter instanceof Converter)) {
+            throw new InvalidConfigException('Invalid configuration of `$converter` property.');
         }
         if (empty($this->type) || !in_array($this->type, [self::TYPE_DATE, self::TYPE_TIME, self::TYPE_DATE_TIME])) {
-            throw new InvalidConfigException('Invalid configuration of $type property.');
+            throw new InvalidConfigException('Invalid configuration of `$type` property.');
         }
         if (empty($this->to) || !in_array($this->to, [self::TO_SAVE, self::TO_DISPLAY])) {
-            throw new InvalidConfigException('Invalid configuration of $to property.');
+            throw new InvalidConfigException('Invalid configuration of `$to` property.');
         }
         $this->_method = 'to';
         switch ($this->to) {
@@ -113,21 +113,21 @@ class TranslatorBehavior extends Behavior
      */
     public function events()
     {
-        return array_fill_keys(array_keys($this->attributes), 'translateAttributes');
+        return array_fill_keys(array_keys($this->attributes), 'convertingAttributes');
     }
     
     /**
-     * Translate value attribute and assigns it to the current attributes.
+     * Converting value attribute and assigns it to the current attributes.
      * @param Event $event
      */
-    public function translateAttributes($event)
+    public function convertingAttributes($event)
     {
         if (!empty($this->attributes[$event->name])) {
             $attributes = (array) $this->attributes[$event->name];
             foreach ($attributes as $attribute) {
                 // ignore attribute names which are not string
                 if (is_string($attribute)) {
-                    $this->owner->$attribute = $this->translator->{$this->_method}($this->owner->$attribute);
+                    $this->owner->$attribute = $this->converter->{$this->_method}($this->owner->$attribute);
                 }
             }
         }

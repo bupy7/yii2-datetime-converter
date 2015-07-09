@@ -1,6 +1,6 @@
 <?php
 
-namespace bupy7\datetime\translator;
+namespace bupy7\datetime\converter;
 
 use Yii;
 use DateTime;
@@ -9,22 +9,24 @@ use yii\base\InvalidConfigException;
 use yii\base\Component;
 
 /**
- * Component for translate date and time for saving or display of user.
+ * Component for converting date and time for saving or display of user.
  * 
  * Usage:
  * 
  * Add component to your config: 
  * 
  * ~~~
- * 'dtTranslator' => [
- *      'class' => 'bupy7\datetime\translator\Translator',
- *      // and config tranlsations if need for your locales (by default uses `en`)
- *      'ru' => [
-            'displayTimeZone' => 'Europe/Moscow',
-            'displayDate' => 'd.m.Y',
-            'displayTime' => 'H:i:s',
-            'displayDateTime' => 'd.m.Y, H:i:s'
-        ],
+ * 'dtConverter' => [
+ *      'class' => 'bupy7\datetime\converter\Converter',
+ *      // add formats if need for your locales (by default uses `en`)
+ *      'formats' => [
+ *          'ru' => [
+ *              'displayTimeZone' => 'Europe/Moscow',
+ *              'displayDate' => 'd.m.Y',
+ *              'displayTime' => 'H:i:s',
+ *              'displayDateTime' => 'd.m.Y, H:i:s',
+ *          ],
+ *      ],
  * ],
  * ~~~
  * 
@@ -32,18 +34,18 @@ use yii\base\Component;
  * 
  * ~~~
  * $datetime = 2015-06-07 12:45:00;
- * echo Yii::$app->dtTranslator->toDisplayDateTime($datetime);
+ * echo Yii::$app->dtConverter->toDisplayDateTime($datetime);
  * ~~~
  * or 
  * ~~~
  * $datetime = new DateTime('now');
- * echo Yii::$app->dtTranslator->toDisplayDateTime($datetime);
+ * echo Yii::$app->dtConverter->toDisplayDateTime($datetime);
  * ~~~
  * 
  * @author Vasilij Belosludcev http://mihaly4.ru
  * @since 1.0.0
  */
-class Translator extends Component
+class Converter extends Component
 {
     /**
      * @var string Time zone which uses for save in database.
@@ -66,17 +68,18 @@ class Translator extends Component
      */
     public $saveDateTime = 'U';
     /**
-     * @var array List of options translations between save date/time format and display date/time format.
-     * Each element of array is language key with required properties for correcty translation operation.
+     * @var array List of formats date and time for display and saving.
+     * Each element of array is language key with required properties for correcty converting operation.
      * Require properties:
      *      - `displayDateTime` - Date and time format for display of user.
      *      - `displayDate` - Date format for display of user.
      *      - `displayTime` - Time format for display of user.
      *      - `displayTimeZone` - Time zone for display of user.
+     * You too can add any other properties at this array. 
      * @see http://php.net/manual/en/timezones.php
      * @see http://php.net/manual/ru/function.date.php
      */
-    public $translations = [
+    public $formats = [
         'en' => [
             'displayTimeZone' => 'UTC',
             'displayDate' => 'Y-m-d',
@@ -86,7 +89,7 @@ class Translator extends Component
     ];
     
     /**
-     * Transalte date to saving.
+     * Converting date to saving.
      * @param DateTime|string $dt Instance of DateTime or string with date.
      * @return string
      */
@@ -96,7 +99,7 @@ class Translator extends Component
     }
     
     /**
-     * Transalte date to display of user.
+     * Converting date to display of user.
      * @param DateTime|string $dt Instance of DateTime or string with date. 
      * @return string 
      */
@@ -106,7 +109,7 @@ class Translator extends Component
     }
     
     /**
-     * Translate date and time to saving. 
+     * Converting date and time to saving. 
      * @param DateTime|string $dt Instance of DateTime or string with date.
      * @return string
      */
@@ -118,7 +121,7 @@ class Translator extends Component
     }
     
     /**
-     * Translate time to display of user.
+     * Converting time to display of user.
      * @param DateTime|string $dt Instance of DateTime or string with date.
      * @return string
      */
@@ -130,7 +133,7 @@ class Translator extends Component
     }
     
     /**
-     * Translate date and time to saving.
+     * Converting date and time to saving.
      * @param DateTime|string $dt Instance of DateTime or string with date.
      * @return string
      */
@@ -142,7 +145,7 @@ class Translator extends Component
     }
     
     /**
-     * Transalte date and time to display of user.
+     * Converting date and time to display of user.
      * @param DateTime|string $dt Instance of DateTime or string with date.
      * @return string
      */
@@ -186,29 +189,29 @@ class Translator extends Component
     }
     
     /**
-     * Get property of current locale of application from translation settings.
+     * Get the value of format of current locale of application from formats settings.
      * @param string $name
      * @return mixed
      */
     public function __get($name)
     {
-        $locale = $this->getTranslation();
-        if (isset($this->translations[$locale][$name])) {
-            return $this->translations[$locale][$name];
+        $locale = $this->getFormat();
+        if (isset($this->format[$locale][$name])) {
+            return $this->format[$locale][$name];
         }
         return parent::__get($name);
     }
     
     /**
-     * Return translation settings of current locale.
+     * Return format settings of current locale.
      * @return array
      * @throws InvalidConfigException
      */
-    protected function getTranslation()
+    protected function getFormat()
     {
         $locale = Yii::$app->language;
-        if (!isset($this->translations[$locale])) {
-            throw new InvalidConfigException("Locale key '{$locale}' not found in `\$translations`.");
+        if (!isset($this->formats[$locale])) {
+            throw new InvalidConfigException("Locale key '{$locale}' not found in `\$formats`.");
         }
         return $locale;
     }
