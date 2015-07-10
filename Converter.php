@@ -53,19 +53,19 @@ class Converter extends Component
      */
     public $saveTimeZone = 'UTC';
     /**
-     * @var string Date format which uses for save in database. (PHP or ICU format).
+     * @var string Date format which uses for save in database. (php date function or ICU format pattern).
      * @see http://php.net/manual/ru/function.date.php
      * @see http://userguide.icu-project.org/formatparse/datetime#TOC-Date-Time-Format-Syntax
      */
     public $saveDate = 'php:Y-m-d';
     /**
-     * @var string Time format which uses for save in database. (PHP or ICU format).
+     * @var string Time format which uses for save in database. (php date function or ICU format pattern).
      * @see http://php.net/manual/ru/function.date.php
      * @see http://userguide.icu-project.org/formatparse/datetime#TOC-Date-Time-Format-Syntax
      */
     public $saveTime = 'php:H:i:s';
     /**
-     * @var string Date and time format which uses for save in database. (PHP or ICU format).
+     * @var string Date and time format which uses for save in database. (php date function or ICU format pattern).
      * @see http://php.net/manual/ru/function.date.php
      * @see http://userguide.icu-project.org/formatparse/datetime#TOC-Date-Time-Format-Syntax
      */
@@ -75,9 +75,9 @@ class Converter extends Component
      * 
      * Each element of array is language key with required format patterns for correcty converting operation:
      *      - `displayTimeZone` - Time zone for display of user.
-     *      - `displayDateTime` - Date and time format for display of user. (PHP or ICU format).
-     *      - `displayDate` - Date format for display of user. (PHP or ICU format).
-     *      - `displayTime` - Time format for display of user. (PHP or ICU format).
+     *      - `displayDateTime` - Date and time format for display of user. (php date function or ICU format pattern).
+     *      - `displayDate` - Date format for display of user. (php date function or ICU format pattern).
+     *      - `displayTime` - Time format for display of user. (php date function or ICU format pattern).
      * 
      * You too can add any other format patterns at this array. 
      * 
@@ -215,8 +215,10 @@ class Converter extends Component
     }
     
     /**
-     * Normalize a date format pattern from ICU format to php date() function format.
+     * Normalize a date format pattern for apply to date/time class and functions.
      *
+     * If format pattern is ICU then this will be normalize to php date function format.
+     * 
      * The conversion is limited to date patterns that do not use escaped characters.
      * Patterns like `d 'of' MMMM yyyy` which will result in a date like `1 of December 2014` may not be 
      * converted correctly because of the use of escaped characters.
