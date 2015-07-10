@@ -97,49 +97,65 @@ class Converter extends Component
     /**
      * Converting date to saving.
      * @param DateTime|string $dt Instance of DateTime or string with date.
+     * @param boolean $useTimeZone Whether set `true` then will be uses time zone for saving.
      * @return string
      */
-    public function toSaveDate($dt)
+    public function toSaveDate($dt, $useTimeZone = false)
     {
         $pattern = self::normalizePattern($this->saveDate);
-        return $this->preSave($dt)->format($pattern);
+        $result = $this->preSave($dt);
+        if ($useTimeZone) {
+            $result->setTimeZone(new DateTimeZone($this->saveTimeZone));
+        }
+        return $result->format($pattern);
     }
     
     /**
      * Converting date to display of user.
      * @param DateTime|string $dt Instance of DateTime or string with date. 
+     * @param boolean $useTimeZone Whether set `true` then will be uses time zone for saving.
      * @return string 
      */
-    public function toDisplayDate($dt)
+    public function toDisplayDate($dt, $useTimeZone = false)
     {
         $pattern = self::normalizePattern($this->displayDate);
-        return $this->preDisplay($dt)->format($pattern);        
+        $result = $this->preDisplay($dt);
+        if ($useTimeZone) {
+            $result->setTimeZone(new DateTimeZone($this->displayTimeZone));
+        }
+        return $result->format($pattern);      
     }
     
     /**
      * Converting date and time to saving. 
      * @param DateTime|string $dt Instance of DateTime or string with date.
+     * @param boolean $useTimeZone Whether set `true` then will be uses time zone for saving.
      * @return string
      */
-    public function toSaveTime($dt)
+    public function toSaveTime($dt, $useTimeZone = false)
     {
         $pattern = self::normalizePattern($this->saveTime);
-        return $this->preSave($dt)
-            ->setTimeZone(new DateTimeZone($this->saveTimeZone))
-            ->format($pattern);
+        $result = $this->preSave($dt);
+        if ($useTimeZone) {
+            $result->setTimeZone(new DateTimeZone($this->saveTimeZone));
+        }
+        $result->format($pattern);
     }
     
     /**
      * Converting time to display of user.
      * @param DateTime|string $dt Instance of DateTime or string with date.
+     * @param boolean $useTimeZone Whether set `true` then will be uses time zone for saving.
      * @return string
      */
-    public function toDisplayTime($dt)
+    public function toDisplayTime($dt, $useTimeZone = false)
     {
         $pattern = self::normalizePattern($this->displayTime);
-        return $this->preDisplay($dt)
-            ->setTimeZone(new DateTimeZone($this->displayTimeZone))
-            ->format($pattern);  
+        $result = $this->preDisplay($dt);
+        if ($useTimeZone) {
+            $result->setTimeZone(new DateTimeZone($this->displayTimeZone));
+        }
+        return $result->format($pattern);  
     }
     
     /**
