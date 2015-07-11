@@ -9,6 +9,32 @@ use yii\base\Event;
 use yii\di\Instance;
 
 /**
+ * Converter date/time behavior for models.
+ * 
+ * Usage:
+ * 
+ * ~~~
+ *  public function behaviors()
+ *  {
+ *       return [
+ *          // converter date/time before save
+ *          [
+ *              'class' => ConverterBehavior::className(),
+ *              'type' => ConverterBehavior::TYPE_DATE_TIME,
+ *              'to' => ConverterBehavior::TO_SAVE,
+ *              'attributes' => [
+ *                  self::EVENT_BEFORE_SAVE => ['attribute_1', 'attribute_2'],
+ *              ],
+ *          ],
+ *      ];
+ *  }
+ * ~~~
+ * 
+ * Result (example):
+ * 
+ * ~~~
+ * 01.01.2015 23:54:00 => 1420156440 
+ * ~~~
  * 
  * @author Belosludcev Vasilij <https://github.com/bupy7>
  * @since 1.0.0
@@ -126,9 +152,13 @@ class ConverterBehavior extends Behavior
         if (!empty($this->attributes[$event->name])) {
             $attributes = (array) $this->attributes[$event->name];
             foreach ($attributes as $attribute) {
-                // ignore attribute names which are not string
-                if (is_string($attribute)) {
-                    $this->owner->$attribute = $this->converter->{$this->_method}($this->owner->$attribute);
+                if (!empty($this->owner->$attribute)) {
+                    if (is_numeric($this->owner->$attribute)) {
+                        $time = '@' . (string)$this->owner->$attribute;
+                    } else {
+                        $time = (string)$this->owner->$attribute;
+                    }
+                    $this->owner->$attribute = $this->converter->{$this->_method}($time);
                 }
             }
         }
