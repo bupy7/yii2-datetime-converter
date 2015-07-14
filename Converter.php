@@ -193,6 +193,9 @@ class Converter extends Component
     public function preDisplay($dt)
     {
         if (!($dt instanceof DateTime)) {
+            if (is_numeric($dt)) {
+                $dt = '@' . $dt;
+            }
             $dt = new DateTime($dt, new DateTimeZone($this->saveTimeZone));
         } else {
             $dt = clone $dt;

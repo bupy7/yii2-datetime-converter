@@ -153,12 +153,7 @@ class ConverterBehavior extends Behavior
             $attributes = (array) $this->attributes[$event->name];
             foreach ($attributes as $attribute) {
                 if (!empty($this->owner->$attribute)) {
-                    if (is_numeric($this->owner->$attribute)) {
-                        $time = '@' . (string)$this->owner->$attribute;
-                    } else {
-                        $time = (string)$this->owner->$attribute;
-                    }
-                    $this->owner->$attribute = $this->converter->{$this->_method}($time);
+                    $this->owner->$attribute = $this->converter->{$this->_method}($this->owner->$attribute);
                 }
             }
         }
