@@ -139,7 +139,7 @@ class Converter extends Component
         if ($useTimeZone) {
             $result->setTimeZone(new DateTimeZone($this->saveTimeZone));
         }
-        $result->format($pattern);
+        return $result->format($pattern);
     }
     
     /**
@@ -258,6 +258,7 @@ class Converter extends Component
         // http://userguide.icu-project.org/formatparse/datetime#TOC-Date-Time-Format-Syntax
         // escaped text
         $escaped = [];
+        $matches = [];
         if (preg_match_all('/(?<!\')\'(.*?[^\'])\'(?!\')/', $pattern, $matches, PREG_SET_ORDER)) {
             foreach ($matches as $match) {
                 $match[1] = str_replace('\'\'', '\'', $match[1]);
