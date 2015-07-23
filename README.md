@@ -31,6 +31,10 @@ Add component to your config:
 ```php
 'dtConverter' => [
     'class' => 'bupy7\datetime\converter\Converter',
+    // 'saveTimeZone' => 'UTC' - by default
+    // 'saveDate' => 'php:Y-m-d' - by default
+    // 'saveTime' => 'php:H:i:s' - by default
+    // 'saveDateTime' => 'php:U' - by default
     // add format patterns if need for your locales (by default uses `en`)
     'patterns' => [
         'ru' => [
