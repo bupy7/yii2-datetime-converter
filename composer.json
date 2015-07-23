@@ -2,6 +2,7 @@
     "name": "bupy7/yii2-datetime-converter",
     "description": "II DEVELOPING!",
     "type": "yii2-extension",
+    "version": "1.0.0",
     "keywords": ["yii2","extension","date","carbon","formatter","datetime","translator","time","datetime","converter"],
     "license": "BSD-3-Clause",
     "authors": [
