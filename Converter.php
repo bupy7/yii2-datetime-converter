@@ -102,7 +102,7 @@ class Converter extends Component
      */
     public function toSaveDate($dt, $useTimeZone = false)
     {
-        $pattern = self::normalizePattern($this->saveDate);
+        $pattern = $this->normalizePattern($this->saveDate);
         $result = $this->preSave($dt);
         if ($useTimeZone) {
             $result->setTimeZone(new DateTimeZone($this->saveTimeZone));
@@ -118,7 +118,7 @@ class Converter extends Component
      */
     public function toDisplayDate($dt, $useTimeZone = false)
     {
-        $pattern = self::normalizePattern($this->displayDate);
+        $pattern = $this->normalizePattern($this->displayDate);
         $result = $this->preDisplay($dt);
         if ($useTimeZone) {
             $result->setTimeZone(new DateTimeZone($this->displayTimeZone));
@@ -134,7 +134,7 @@ class Converter extends Component
      */
     public function toSaveTime($dt, $useTimeZone = false)
     {
-        $pattern = self::normalizePattern($this->saveTime);
+        $pattern = $this->normalizePattern($this->saveTime);
         $result = $this->preSave($dt);
         if ($useTimeZone) {
             $result->setTimeZone(new DateTimeZone($this->saveTimeZone));
@@ -150,7 +150,7 @@ class Converter extends Component
      */
     public function toDisplayTime($dt, $useTimeZone = false)
     {
-        $pattern = self::normalizePattern($this->displayTime);
+        $pattern = $this->normalizePattern($this->displayTime);
         $result = $this->preDisplay($dt);
         if ($useTimeZone) {
             $result->setTimeZone(new DateTimeZone($this->displayTimeZone));
@@ -165,7 +165,7 @@ class Converter extends Component
      */
     public function toSaveDateTime($dt)
     {
-        $pattern = self::normalizePattern($this->saveDateTime);
+        $pattern = $this->normalizePattern($this->saveDateTime);
         return $this->preSave($dt)
             ->setTimeZone(new DateTimeZone($this->saveTimeZone))
             ->format($pattern);
@@ -178,7 +178,7 @@ class Converter extends Component
      */
     public function toDisplayDateTime($dt)
     {
-        $pattern = self::normalizePattern($this->displayDateTime);
+        $pattern = $this->normalizePattern($this->displayDateTime);
         return $this->preDisplay($dt)
             ->setTimeZone(new DateTimeZone($this->displayTimeZone))
             ->format($pattern); 
@@ -253,7 +253,7 @@ class Converter extends Component
      * @param string $pattern date format pattern in ICU format.
      * @return string Normalize date format pattern.
      */
-    static public function normalizePattern($pattern)
+    public function normalizePattern($pattern)
     {
         if (strpos($pattern, 'php:') === 0) {
             return substr($pattern, 4);         
