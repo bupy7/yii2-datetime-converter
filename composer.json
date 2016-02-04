@@ -26,7 +26,7 @@
         "yiisoft/yii2": "*"
     },
     "require-dev": {
-        "satooshi/php-coveralls": "1.0.0",
+        "satooshi/php-coveralls": "1.0.1",
         "nesbot/carbon": "*"
     },
     "autoload": {
