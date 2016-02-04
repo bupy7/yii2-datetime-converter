@@ -1,6 +1,13 @@
 yii2-datetime-converter
 ====================
 
+[![Latest Stable Version](https://poser.pugx.org/bupy7/yii2-datetime-converter/v/stable)](https://packagist.org/packages/bupy7/yii2-datetime-converter)
+[![Total Downloads](https://poser.pugx.org/bupy7/yii2-datetime-converter/downloads)](https://packagist.org/packages/bupy7/yii2-datetime-converter)
+[![Latest Unstable Version](https://poser.pugx.org/bupy7/yii2-datetime-converter/v/unstable)](https://packagist.org/packages/bupy7/yii2-datetime-converter)
+[![License](https://poser.pugx.org/bupy7/yii2-datetime-converter/license)](https://packagist.org/packages/bupy7/yii2-datetime-converter)
+[![Build Status](https://travis-ci.org/bupy7/yii2-datetime-converter.svg?branch=master)](https://travis-ci.org/bupy7/yii2-datetime-converter)
+[![Coverage Status](https://coveralls.io/repos/github/bupy7/yii2-datetime-converter/badge.svg?branch=master)](https://coveralls.io/github/bupy7/yii2-datetime-converter?branch=master)
+
 Converting date/time from display/save to save/display format.
 
 Installation
