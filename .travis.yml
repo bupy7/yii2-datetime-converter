@@ -12,4 +12,4 @@ before_script:
   - composer install --no-interaction
 
 after_script:
-  - vendor/bin/coveralls -v
+  - travis_retry php vendor/bin/coveralls -v
