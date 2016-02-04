@@ -32,5 +32,10 @@
         "psr-4": {
             "bupy7\\datetime\\converter\\": "src"
         }
+    },
+    "extra": {
+        "asset-installer-paths": {
+            "bower-asset-library": "vendor/bower"
+        }
     }
 }
