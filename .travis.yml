@@ -7,9 +7,8 @@ php:
   - hhvm
   
 before_script:
-  - composer self-update && composer --version
   - composer global require "fxp/composer-asset-plugin:~1.1.0"
   - composer install --no-interaction
 
 after_script:
-  - travis_retry php vendor/bin/coveralls -v
+  - vendor/bin/coveralls -v
