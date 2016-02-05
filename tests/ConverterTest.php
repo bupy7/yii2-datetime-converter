@@ -12,6 +12,22 @@ use Carbon\Carbon;
  */
 class ConverterTest extends TestCase
 {    
+    /**
+     * @inheritdoc
+     */
+    public function setUp()
+    {
+        $this->setLanguage('ru');
+        self::$dtConverter->patterns = [
+            'ru' => [
+                'displayTimeZone' => 'Europe/Moscow',
+                'displayDate' => "'Custom text 'dd.LL.yyyy",
+                'displayTime' => 'php:H:i',
+                'displayDateTime' => 'php:d.m.Y, H:i',
+            ],
+        ];
+    }
+    
     public function testToSaveDate()
     {
         $this->assertEquals('2016-12-12', self::$dtConverter->toSaveDate('12.12.2016 00:00:00'));
@@ -82,16 +98,8 @@ class ConverterTest extends TestCase
      */
     public function testInvalidFormatPattern()
     {
-        Yii::$app->language = 'en';
+        $this->setLanguage('en');
         self::$dtConverter->toDisplayDateTime('1481490000');
-    }
-    
-    /**
-     * @inheritdoc
-     */
-    public function setUp()
-    {
-        Yii::$app->language = 'ru';
     }
 }
 

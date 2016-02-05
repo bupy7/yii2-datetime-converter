@@ -7,7 +7,7 @@ use yii\base\Model;
 use bupy7\datetime\converter\Converter;
 
 /**
- * Example the post test model.
+ * Test model of `bupy7\datetime\converter\Converter` behavior.
  * @author Belosludcev Vasilij <https://github.com/bupy7>
  * @since 1.1.1
  */
@@ -16,7 +16,19 @@ class Post extends Model
     /**
      * @var string
      */
-    public $created_at;
+    public $time;
+    /**
+     * @var string
+     */
+    public $date;
+    /**
+     * @var string
+     */
+    public $datetime;
+    /**
+     * @var array
+     */
+    public $preparedData = [];
     /**
      * @var Converter
      */
@@ -26,9 +38,9 @@ class Post extends Model
      * @inheritdoc
      * @param Converter $dtConverter
      */
-    public function init(Converter $dtConverter)
+    public function __construct(Converter $dtConverter, $config = [])
     {
-        parent::init();
+        parent::__construct($config);
         $this->dtConverter = $dtConverter;
     }
     
@@ -38,7 +50,31 @@ class Post extends Model
     public function rules()
     {
         return [
-            [['created_at'], 'date', 'format' => $this->dtConverter->displayDateTime],
+            [['time'], 'date', 'format' => $this->dtConverter->saveTime],
+            [['date'], 'date', 'format' => $this->dtConverter->saveDate],
+            [['datetime'], 'date', 'format' => $this->dtConverter->saveDateTime],
         ];
+    }
+    
+    /**
+     * @inheritdoc
+     */
+    public function beforeValidate()
+    {
+        if (!parent::beforeValidate()) {
+            return false;
+        }
+        foreach ($this->activeAttributes() as $attribute) {
+            $this->preparedData[$attribute] = $this->$attribute;
+        }
+        return true;
+    }
+    
+    /**
+     * @return array
+     */
+    public function getPreparedData()
+    {
+        return $this->preparedData;
     }
 }

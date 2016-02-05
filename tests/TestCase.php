@@ -25,4 +25,13 @@ abstract class TestCase extends PHPUnit_Framework_TestCase
     {      
         self::$dtConverter = Yii::$app->get('dtConverter');
     }
+    
+    /**
+     * @param string $language IETF language tags.
+     * @see \yii\base\Application::$language
+     */
+    public function setLanguage($language)
+    {
+        Yii::$app->language = $language;
+    }
 }

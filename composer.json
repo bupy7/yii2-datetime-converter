@@ -2,7 +2,7 @@
     "name": "bupy7/yii2-datetime-converter",
     "description": "Converting date and/or time from saving format to display and converse.",
     "type": "yii2-extension",
-    "version": "1.1.0",
+    "version": "1.1.1",
     "keywords": [
         "yii2",
         "extension",
