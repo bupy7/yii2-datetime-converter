@@ -1,5 +1,7 @@
 <?php
 
+use yii\console\Application;
+
 define('YII_ENABLE_ERROR_HANDLER', false);
 define('YII_DEBUG', true);
 
@@ -11,4 +13,4 @@ require_once(__DIR__ . '/../vendor/yiisoft/yii2/Yii.php');
 
 Yii::setAlias('@tests', __DIR__);
 
-require_once(__DIR__ . '/TestCase.php');
+new Application(require __DIR__ . '/config/main.php');
